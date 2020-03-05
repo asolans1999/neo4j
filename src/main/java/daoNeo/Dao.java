@@ -37,9 +37,7 @@ public class Dao implements AutoCloseable {
     public void insertEmpleado(String name, String password, String fullname, String phone){
         
         Session session = driver.session();
-        //session.run("CREATE (empleado: Empleado {name: {name}, password: {password}, fullname: {fullname}, phone: {phone})",parameters("name", name, "password", password,"fullname",fullname,"phone",phone));
-        //session.run("CREATE (empleado:Empleado {name: "+name+", password: "+ password + ",fullname: "+ fullname + ", phone: "+ phone + "}");
-        session.run("CREATE (Empleado:empleado {name: 'pepito'})");
+        session.run("CREATE (Empleado:empleado {name: '"+name+"', password: '"+ password + "',fullname: '"+ fullname + "', phone: '"+ phone + "'})");
     }
     
     public void printPeople(String initial)
