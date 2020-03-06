@@ -9,6 +9,10 @@ package daoNeo;
  *
  * @author arnauu
  */
+import exceptions.NeoExceptions;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import model.Empleado;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
@@ -34,28 +38,45 @@ public class Dao implements AutoCloseable {
         }
         return initConex;
     }
-    public void insertEmpleado(String name, String password, String fullname, String phone){
-        
+    public void insertEmpleado(Empleado e){      
         Session session = driver.session();
-        session.run("CREATE (Empleado:empleado {name: '"+name+"', password: '"+ password + "',fullname: '"+ fullname + "', phone: '"+ phone + "'})");
+        session.run("CREATE (Empleado:empleado {name: '"+e.getUserName()+"', password: '"+ e.getPassword() + "',fullname: '"+ e.getFullName() + "', phone: '"+ e.getPhone() + "'})");
     }
     
-    public void printPeople(String initial)
+    public Empleado loguinEmpleado(String n, String pass) throws NeoExceptions{
+        Session session = driver.session();
+        Result result = session.run("MATCH (n:empleado) where n.name = '"+n+"' RETURN n.password,n.fullname,n.phone");
+        if (!result.hasNext()) {
+            throw new NeoExceptions(NeoExceptions.INCORRECT_LOGUIN);
+        }
+        Record record = result.next();
+        if (!record.get("n.password").asString().equals(pass)) {
+            throw new NeoExceptions(NeoExceptions.INCORRECT_LOGUIN);
+        }
+        Empleado e = new Empleado(n,pass,record.get("n.fullname").asString(),record.get("n.phone").asString());
+        return e;
+
+    }
+    
+    public boolean existeEmpleado(String nombre){
+        Session session = driver.session();
+        Result result = session.run("MATCH (n:empleado) where n.name = '"+nombre+"' RETURN n");
+        while(result.hasNext()){
+            return true;
+        }
+        return false;
+    }
+    
+    public void printPeople(String name)
     {
         try (Session session = driver.session())
         {
-            // A Managed Transaction transactions are a quick and easy way to wrap a Cypher Query.
-            // The `session.run` method will run the specified Query.
-            // This simpler method does not use any automatic retry mechanism.
-            Result result = session.run(
-                    "MATCH (a:Person) WHERE a.name STARTS WITH $x RETURN a.name AS name",
-                    parameters("x", initial));
-            // Each Cypher execution returns a stream of records.
-            while (result.hasNext())
-            {
+            Result result = session.run("MATCH (n:empleado {name:'"+name+"'}) RETURN n.name, n.fullname, n.phone");
+            while(result.hasNext()){
                 Record record = result.next();
-                // Values can be extracted from a record by index or name.
-                System.out.println(record.get("name").asString());
+                System.out.println(record.get("n.name").asString());
+                System.out.println(record.get("n.fullname").asString());
+                System.out.println(record.get("n.phone").asString());
             }
         }
     }
