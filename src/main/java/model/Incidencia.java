@@ -13,22 +13,35 @@ import java.util.Date;
  * @author arnauu
  */
 public class Incidencia {
+    private int id;
     private Date datetime;
     private String origen;
     private String destino;
     private String descripcion;
     private TipoIncidencia tipoIncidencia;
+    private Empleado empleado;
 
-    public Incidencia(Date datetime, String origen, String destino, String descripcion, TipoIncidencia tipoIncidencia) {
+    public Incidencia(int id, Date datetime, String origen, String destino, String descripcion, TipoIncidencia tipoIncidencia, Empleado empleado) {
+        this.id = id;
         this.datetime = datetime;
         this.origen = origen;
         this.destino = destino;
         this.descripcion = descripcion;
         this.tipoIncidencia = tipoIncidencia;
+        this.empleado = empleado;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Empleado getEmpleado() {
+        return empleado;
     }
     
     
-
+    
+    
     public Date getDatetime() {
         return datetime;
     }

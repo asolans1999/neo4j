@@ -15,12 +15,12 @@ import java.util.Date;
 public class Historial {
     private TipoEvento tipoEvento;
     private Date dateTime;
-    private Empleado empledo;
+    private Empleado empleado;
 
-    public Historial(TipoEvento tipoEvento, Date dateTime, Empleado empledo) {
+    public Historial(TipoEvento tipoEvento, Date dateTime, Empleado empleado) {
         this.tipoEvento = tipoEvento;
         this.dateTime = dateTime;
-        this.empledo = empledo;
+        this.empleado = empleado;
     }
 
     public TipoEvento getTipoEvento() {
@@ -39,12 +39,12 @@ public class Historial {
         this.dateTime = dateTime;
     }
 
-    public Empleado getEmpledo() {
-        return empledo;
+    public Empleado getEmpleado() {
+        return empleado;
     }
 
-    public void setEmpledo(Empleado empledo) {
-        this.empledo = empledo;
+    public void setEmpleado(Empleado empleado) {
+        this.empleado = empleado;
     }
     
     

@@ -12,6 +12,7 @@ package exceptions;
 public class NeoExceptions extends Exception {
     
     public static final String EMPLEADO_EXISTS= "< ERROR: Name existing >";
+    public static final String INCIDENCIA_EXISTS= "< ERROR: Incidence id existing >";
     public static final String NO_COINCIDEN= "< ERROR: Passwords don't match >";
     public static final String INCORRECT_TLF= "< ERROR: Incorrect phone format >";
     public static final String INCORRECT_LOGUIN= "< ERROR: Incorrect loguin > ";

@@ -67,6 +67,16 @@ public class Dao implements AutoCloseable {
         return false;
     }
     
+     public boolean existeIncidencia(int id){
+        Session session = driver.session();
+        Result result = session.run("MATCH (n:incidencia) where n.id = '"+id+"' RETURN n");
+        while(result.hasNext()){
+            return true;
+        }
+        return false;
+    }
+    
+    
     public void printPeople(String name)
     {
         try (Session session = driver.session())
@@ -80,8 +90,12 @@ public class Dao implements AutoCloseable {
             }
         }
     }
-    public void close() throws Exception
+    public void close()
     {
        driver.close();
     }
+    
+    //Encontrar un nodo por el id : MATCH (n:empleado) where  ID(n) = 0  return n
+    //Devuelve el id de un nodo: MATCH (n:empleado) where n.name = 'arnau'RETURN ID(n)
+    //Eliminar un nodo: MATCH (n:empleado{ name: 'funciona' }) DELETE n
 }
