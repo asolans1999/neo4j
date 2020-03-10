@@ -15,33 +15,34 @@ import java.util.Date;
 public class Incidencia {
     private int id;
     private Date datetime;
-    private String origen;
-    private String destino;
+    private Empleado origen;
+    private Empleado destino;
     private String descripcion;
     private TipoIncidencia tipoIncidencia;
-    private Empleado empleado;
 
-    public Incidencia(int id, Date datetime, String origen, String destino, String descripcion, TipoIncidencia tipoIncidencia, Empleado empleado) {
+    public Incidencia(int id, Date datetime, Empleado origen, Empleado destino, String descripcion, TipoIncidencia tipoIncidencia) {
         this.id = id;
         this.datetime = datetime;
         this.origen = origen;
         this.destino = destino;
         this.descripcion = descripcion;
         this.tipoIncidencia = tipoIncidencia;
-        this.empleado = empleado;
+    }
+
+    public Incidencia() {
+       
     }
 
     public int getId() {
         return id;
     }
 
-    public Empleado getEmpleado() {
-        return empleado;
+    public void setId(int id) {
+        this.id = id;
     }
     
     
-    
-    
+        
     public Date getDatetime() {
         return datetime;
     }
@@ -50,19 +51,19 @@ public class Incidencia {
         this.datetime = datetime;
     }
 
-    public String getOrigen() {
+    public Empleado getOrigen() {
         return origen;
     }
 
-    public void setOrigen(String origen) {
+    public void setOrigen(Empleado origen) {
         this.origen = origen;
     }
 
-    public String getDestino() {
+    public Empleado getDestino() {
         return destino;
     }
 
-    public void setDestino(String destino) {
+    public void setDestino(Empleado destino) {
         this.destino = destino;
     }
 

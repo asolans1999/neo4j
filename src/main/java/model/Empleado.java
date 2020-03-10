@@ -22,6 +22,10 @@ public class Empleado {
         this.phone = phone;
     }
 
+    public Empleado() {
+       
+    }
+
     public String getUserName() {
         return userName;
     }

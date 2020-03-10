@@ -16,9 +16,11 @@ import exceptions.NeoExceptions;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Empleado;
+import model.Incidencia;
 
 
 public class vista {
@@ -33,12 +35,24 @@ public class vista {
             try{
                 if (logueado!=null) {
                     System.out.println("< Welcome " +logueado.getFullName()+" >");
-                    System.out.println("0.Log off");
-                    System.out.println("1.Put incidence");
-                    menu = InputAsker.askInt("Choose option", 0, 1);
+                    System.out.println("1. Put incidence");
+                    System.out.println("2. Modify your account");
+                    System.out.println("3. See your oirigin incidences");
+                    System.out.println("4. See your destination incidences");
+                    System.out.println("0. Log off");
+                    menu = InputAsker.askInt("Choose option", 0, 4);
                     switch(menu){
                         case 1:
                             incidencia();
+                            break;
+                        case 2:
+                            modify();
+                            break;
+                        case 3:
+                            originIncidence();
+                            break;
+                        case 4:
+                            destinationIncidence();
                             break;
                         case 0:
                             System.out.println("Good bye !");
@@ -47,7 +61,7 @@ public class vista {
                     }
                 }else{
                     initMenu();
-                    menu = InputAsker.askInt("Choose option", 0, 3);
+                    menu = InputAsker.askInt("Choose option", 0, 2);
                     switch(menu){
                         case 1:
                             login();
@@ -55,7 +69,7 @@ public class vista {
                         case 2:
                             registration();
                             break;       
-                        case 3:
+                        case 0:
                             daoNeo.close();
                             System.out.println("Good bye! ");
                             exit= true;
@@ -91,29 +105,44 @@ public class vista {
     }
     
     private static void incidencia() throws NeoExceptions, ParseException{
-        int id = InputAsker.askInt("Id de incidencia: ", 0, Integer.MAX_VALUE);
+        List<Empleado> returnEmpleados = daoNeo.returnEmpleados();
+        for (int i = 0; i < returnEmpleados.size(); i++) {
+            if (returnEmpleados.get(i).getUserName().equals(logueado.getUserName())) {
+                returnEmpleados.remove(i);
+            }
+        }
+        if (returnEmpleados.isEmpty()) {
+           throw new NeoExceptions(NeoExceptions.NO_EXISTS_EMPLEADOS);
+        }
+        int id = InputAsker.askInt("Id incidence: ", 0, Integer.MAX_VALUE);
         if (daoNeo.existeIncidencia(id)) {
            throw new NeoExceptions(NeoExceptions.INCIDENCIA_EXISTS); 
         }
-        String origen = InputAsker.askString("Origen: ");
-        String destino = InputAsker.askString("Destino: ");
-        String descr = InputAsker.askString("Descripción: ");
+        Empleado origen = logueado;     
+        int cont = 0;      
+        for (int i = 0; i < returnEmpleados.size(); i++) {
+            cont++;
+            System.out.println(cont + ". " + returnEmpleados.get(i).getUserName());
+        } 
+        int des = InputAsker.askInt("Destination: ",1,cont);
+        Empleado destino = returnEmpleados.get(des - 1);
+        String descr = InputAsker.askString("Description: ");
         System.out.println("1. Normal");
-        System.out.println("2. Urgente");
+        System.out.println("2. Urgent");
         int esc = InputAsker.askInt("Choose type of incidence", 1, 2);
+        TipoIncidencia tipo = null;
         switch(esc){
             case 1:
-                TipoIncidencia tipo = TipoIncidencia.NORMAL;
+                tipo = TipoIncidencia.NORMAL;
                 break;
             case 2:
                 tipo = TipoIncidencia.URGENTE;
                 break;
         }
         Date d = new Date();
-        SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
-        String date = format1.format(d);
-        Date date1 = format1.parse(date);
-        //acabar insertar incidencia
+        Incidencia inci = new Incidencia(id, d, origen, destino, descr, tipo);
+        daoNeo.insertIncidencia(inci,logueado);
+        System.out.println("Incidence registred correctly");
     }
     
     private static void login() throws NeoExceptions{
@@ -122,11 +151,73 @@ public class vista {
         logueado = daoNeo.loguinEmpleado(userName, pass);
     }
     
+    private static void modify() throws NeoExceptions{
+        System.out.println("1. Fullname ("+ logueado.getFullName() +")");
+        System.out.println("2. Phone ("+ logueado.getPhone()+")");
+        System.out.println("3. Password");
+        System.out.println("0. Cancel");
+        int m = InputAsker.askInt("Choose option: ", 0, 3);
+        switch(m){
+            case 0: 
+                System.out.println("Canceling...");
+                break;
+            case 1:
+                String fullanme = InputAsker.askString("New fullname: ");
+                logueado.setFullName(fullanme);
+                daoNeo.modifyEmpleado(logueado);
+                System.out.println("Modify correctly");
+                break;
+            case 2:
+                String phone = InputAsker.askString("New phone: ");       
+                if (phone.length()!=9) {
+                    throw new NeoExceptions(NeoExceptions.INCORRECT_TLF);
+                }
+                logueado.setPhone(phone);
+                daoNeo.modifyEmpleado(logueado);
+                System.out.println("Modify correctly");
+                break;
+            case 3:
+                String pass = InputAsker.askString("New password: ");
+                String pass2 = InputAsker.askString("Confirm new password: ");
+                if (!pass.equals(pass2)) {
+                    throw new NeoExceptions(NeoExceptions.NO_COINCIDEN);
+                }
+                logueado.setPassword(pass);
+                daoNeo.modifyEmpleado(logueado);
+                System.out.println("Modify correctly");
+                break;
+        }      
+    }
+    
+    private static void originIncidence() throws ParseException, NeoExceptions{
+        List<Incidencia> incidenciaByOrigen = daoNeo.getIncidenciaByOrigen(logueado);
+        if (incidenciaByOrigen.isEmpty()) {
+            throw new NeoExceptions(NeoExceptions.INCIDENCE_BY_ORIGIN);
+        }
+        for(Incidencia i : incidenciaByOrigen){
+            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            String d = format1.format(i.getDatetime());
+            System.out.println("Id: "+i.getId() +" | Tipe: " + i.getTipoIncidencia()+" | Description: " + i.getDescripcion() + " | Destination: "+ i.getDestino().getUserName() +" | Date: "+ d);
+        }    
+    }
+    
+    private static void destinationIncidence() throws NeoExceptions, ParseException{
+        List<Incidencia> incidenciaByDestino = daoNeo.getIncidenciaBydestination(logueado);
+        if (incidenciaByDestino.isEmpty()) {
+            throw new NeoExceptions(NeoExceptions.INCIDENCE_BY_DESTINATION);
+        }
+        for(Incidencia i : incidenciaByDestino){
+            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            String d = format1.format(i.getDatetime());
+            System.out.println("Id: "+i.getId() +" | Tipe: " + i.getTipoIncidencia()+" | Description: " + i.getDescripcion() + " | Origin: "+ i.getOrigen().getUserName() +" | Date: "+ d);
+        }    
+    }
+    
     private static void initMenu(){
         System.out.println("<< NEO4J >>");
-        System.out.println("1.Log in");
-        System.out.println("2.Registration");
-        System.out.println("3. Exit");
+        System.out.println("1. Log in");
+        System.out.println("2. Registration");
+        System.out.println("0. Exit");
     }
     
 }
