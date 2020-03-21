@@ -18,7 +18,10 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.Empleado;
+import model.Evento;
 import model.Incidencia;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
@@ -30,7 +33,7 @@ import org.neo4j.driver.Result;
 import static org.neo4j.driver.Values.parameters;
 
 
-public class Dao implements AutoCloseable {
+public class Dao implements DAOInterface {
     
     private final Driver driver;
     private static Dao initConex;
@@ -50,17 +53,19 @@ public class Dao implements AutoCloseable {
         session.run("CREATE (Empleado:empleado {name: '"+e.getUserName()+"', password: '"+ e.getPassword() + "',fullname: '"+ e.getFullName() + "', phone: '"+ e.getPhone() + "'})");
     }
     
-    public void insertIncidencia(Incidencia i, Empleado e) throws ParseException{
+    @Override
+    public void insertIncidencia(Incidencia i )throws ParseException{
         SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
         String date = format1.format(i.getDatetime());
         Session session = driver.session();
         session.run("CREATE (Incidencia:incidencia {id: '"+i.getId()+"', datetime: '"+ date + "',origen: '"+ i.getOrigen().getUserName() + "', destino: '"+ i.getDestino().getUserName() + "', descripcion: '"+ i.getDescripcion()+"', tipo: '"+ i.getTipoIncidencia().toString()+"'})");
-        session.run("MATCH (a:empleado),(b:incidencia) WHERE a.name = '"+e.getUserName()+"' and b.id='"+i.getId()+"' CREATE (a)-[: origin]->(b)");
+        session.run("MATCH (a:empleado),(b:incidencia) WHERE a.name = '"+i.getOrigen().getUserName()+"' and b.id='"+i.getId()+"' CREATE (a)-[: origin]->(b)");
         session.run("MATCH (a:incidencia),(b:empleado) WHERE a.id = '"+i.getId()+"' and b.name='"+i.getDestino().getUserName()+"' CREATE (a)-[: destination]->(b)");
     }
     
     
-    public Empleado loguinEmpleado(String n, String pass) throws NeoExceptions{
+    @Override
+    public Empleado loginEmpleado(String n, String pass) throws NeoExceptions{
         Session session = driver.session();
         Result result = session.run("MATCH (n:empleado) where n.name = '"+n+"' RETURN n.password,n.fullname,n.phone");
         if (!result.hasNext()) {
@@ -105,7 +110,8 @@ public class Dao implements AutoCloseable {
         return false;
     }
     
-    public void modifyEmpleado(Empleado e){
+    @Override
+    public void updateEmpleado(Empleado e){
         Session session = driver.session();
         Result result = session.run("MERGE (p:empleado {name: '"+e.getUserName()+"'}) SET p.fullname = '"+e.getFullName()+"', p.phone = '"+e.getPhone()+"', p.password = '"+e.getPassword()+"'");
     }
@@ -130,7 +136,8 @@ public class Dao implements AutoCloseable {
         return incidencias;
     }
     
-    public List<Incidencia> getIncidenciaBydestination(Empleado e) throws ParseException{
+    @Override
+    public List<Incidencia> getIncidenciaByDestino(Empleado e) throws ParseException{
         List<Incidencia>  incidencias = new ArrayList<>();
         Session session = driver.session();
         Result result = session.run("MATCH (a:incidencia) WHERE a.destino = '"+e.getUserName()+"' return a.origen,a.datetime,a.descripcion,a.tipo,a.id");
@@ -162,4 +169,90 @@ public class Dao implements AutoCloseable {
     //MATCH (a:empleado),(b:incidencia) WHERE a.name = 'arnau' and b.id='1' CREATE (a)-[: put]->(b)
     //Eliminar una relacion : MATCH (n { name: 'arnau' })-[r:put]->() DELETE r
     //Modificar : MERGE (p:empleado {name: 'arnau'}) SET p.fullname = 'arnau solans', p.phone = '111111111'
+    //MATCH (a:incidencia) WHERE a.origen = 'arnau' or a.destino = 'arnau' return a
+
+    @Override
+    public void removeEmpleado(Empleado e) {
+        Session session = driver.session();
+        Result result = session.run("MATCH (n { name: '"+e.getUserName()+"' }) DETACH DELETE n");
+    }
+
+    @Override
+    public Incidencia getIncidenciaById(int id) {
+        return null; 
+    }
+
+    @Override
+    public List<Incidencia> selectAllIncidencias() {
+        List<Incidencia>  incidencias = new ArrayList<>();
+        Session session = driver.session();
+        Result result = session.run("MATCH (a:incidencia) return a.destino,a.origen, a.datetime,a.descripcion,a.tipo,a.id");
+        while(result.hasNext()){
+            Record record = result.next();
+            Incidencia i = new Incidencia();
+            i.setId(Integer.valueOf(record.get("a.id").asString()));
+            Empleado destino = new Empleado();
+            destino.setUserName(record.get("a.destino").asString());
+            i.setDestino(destino);
+            Empleado origen = new Empleado();
+            origen.setUserName(record.get("a.origen").asString());
+            i.setOrigen(origen);
+            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            Date d = null;
+            try {
+                d = format1.parse(record.get("a.datetime").asString());
+            } catch (ParseException ex) {
+                Logger.getLogger(Dao.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            i.setDatetime(d);
+            i.setDescripcion(record.get("a.descripcion").asString());
+            i.setTipoIncidencia(TipoIncidencia.valueOf(record.get("a.tipo").asString()));
+            incidencias.add(i);
+        }
+        return incidencias;
+    }
+    
+    @Override
+    public void insertarEvento(Evento e) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Evento getUltimoInicioSesion(Empleado e) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<RankingTO> getRankingEmpleados() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public List<Incidencia> selectAllIncidenciasForUser(Empleado e) {
+        List<Incidencia>  incidencias = new ArrayList<>();
+        Session session = driver.session();
+        Result result = session.run("MATCH (a:incidencia) WHERE a.origen = '"+e.getUserName()+"' or a.destino = '"+e.getUserName()+"' return a.destino,a.origen, a.datetime,a.descripcion,a.tipo,a.id");
+        while(result.hasNext()){
+            Record record = result.next();
+            Incidencia i = new Incidencia();
+            i.setId(Integer.valueOf(record.get("a.id").asString()));
+            Empleado destino = new Empleado();
+            destino.setUserName(record.get("a.destino").asString());
+            i.setDestino(destino);
+            Empleado origen = new Empleado();
+            origen.setUserName(record.get("a.origen").asString());
+            i.setOrigen(origen);
+            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            Date d = null;
+            try {
+                d = format1.parse(record.get("a.datetime").asString());
+            } catch (ParseException ex) {
+                Logger.getLogger(Dao.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            i.setDatetime(d);
+            i.setDescripcion(record.get("a.descripcion").asString());
+            i.setTipoIncidencia(TipoIncidencia.valueOf(record.get("a.tipo").asString()));
+            incidencias.add(i);
+        }
+        return incidencias;
+    }
 }
