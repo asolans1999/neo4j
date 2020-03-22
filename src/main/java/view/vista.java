@@ -105,6 +105,10 @@ public class vista {
         }while(!exit);
     }
     
+    /**
+     * Pide todos los campos para registrarte los verifica y si son correctos registra el empleado
+     * @throws NeoExceptions 
+     */
     private static void registration() throws NeoExceptions{
         String userName = InputAsker.askString("Username: ");
         if (daoNeo.existeEmpleado(userName)) {
@@ -126,7 +130,11 @@ public class vista {
         daoNeo.insertEmpleado(e);
         System.out.println("Registration correct");
     }
-    
+    /**
+     * Pide todos los campos de incidencia y si todo esta correcta la inserta
+     * @throws NeoExceptions
+     * @throws ParseException 
+     */
     private static void incidencia() throws NeoExceptions, ParseException{
         List<Empleado> returnEmpleados = daoNeo.returnEmpleados();
         for (int i = 0; i < returnEmpleados.size(); i++) {
@@ -167,13 +175,19 @@ public class vista {
         daoNeo.insertIncidencia(inci);
         System.out.println("Incidence registred correctly");
     }
-    
+    /**
+     * Permite inciar sesion por user y contraseña
+     * @throws NeoExceptions 
+     */
     private static void login() throws NeoExceptions{
         String userName = InputAsker.askString("Username: ");
         String pass = InputAsker.askString("Password: ");
         logueado = daoNeo.loginEmpleado(userName, pass);
     }
-    
+    /**
+     * Permite modificar el empleado
+     * @throws NeoExceptions 
+     */
     private static void modify() throws NeoExceptions{
         System.out.println("1. Fullname ("+ logueado.getFullName() +")");
         System.out.println("2. Phone ("+ logueado.getPhone()+")");
@@ -215,7 +229,11 @@ public class vista {
 
         }      
     }
-    
+    /**
+     * Permite ver tus incidencias creadas
+     * @throws ParseException
+     * @throws NeoExceptions 
+     */
     private static void originIncidence() throws ParseException, NeoExceptions{
         List<Incidencia> incidenciaByOrigen = daoNeo.getIncidenciaByOrigen(logueado);
         if (incidenciaByOrigen.isEmpty()) {
@@ -227,7 +245,11 @@ public class vista {
             System.out.println("Id: "+i.getId() +" | Tipe: " + i.getTipoIncidencia()+" | Description: " + i.getDescripcion() + " | Destination: "+ i.getDestino().getUserName() +" | Date: "+ d);
         }    
     }
-    
+    /**
+     * Permite ver tus incidencias por destino
+     * @throws NeoExceptions
+     * @throws ParseException 
+     */
     private static void destinationIncidence() throws NeoExceptions, ParseException{
         List<Incidencia> incidenciaByDestino = daoNeo.getIncidenciaByDestino(logueado);
         if (incidenciaByDestino.isEmpty()) {
@@ -239,7 +261,10 @@ public class vista {
             System.out.println("Id: "+i.getId() +" | Tipe: " + i.getTipoIncidencia()+" | Description: " + i.getDescripcion() + " | Origin: "+ i.getOrigen().getUserName() +" | Date: "+ d);
         }    
     }
-    
+    /**
+     * Permite borrar tu cuenta verificando correctmaente que eres tu
+     * @throws NeoExceptions 
+     */
     private static void deleteAcount() throws NeoExceptions{
         System.out.println("1. Yes");
         System.out.println("2. No");
@@ -256,7 +281,10 @@ public class vista {
             System.out.println("Canceling...");
         }
     }
-    
+    /**
+     * Devuelve una incidencia por el id
+     * @throws NeoExceptions 
+     */
     private static void incidenceById() throws NeoExceptions{
         List<Incidencia> incidencias = daoNeo.selectAllIncidenciasForUser(logueado);
         if (incidencias.isEmpty()) {
@@ -273,7 +301,10 @@ public class vista {
         String d = format1.format(i.getDatetime());
         System.out.println("Id: "+i.getId() +" | Tipe: " + i.getTipoIncidencia()+" | Description: " + i.getDescripcion() + " | Origin: "+ i.getOrigen().getUserName() +" | Destination: "+i.getDestino().getUserName()+ " | Date: "+ d);
     }
-    
+    /**
+     * Ver todas las incidencias
+     * @throws NeoExceptions 
+     */
     private static void seeAllIncidence() throws NeoExceptions{
         List<Incidencia> incidencias = daoNeo.selectAllIncidencias();
         if (incidencias.isEmpty()) {
@@ -286,7 +317,9 @@ public class vista {
         }
         
     }
-    
+    /**
+     * Ver todo el ranking
+     */
     private static void getRanking(){
         System.out.println("hola");
         List<RankingTO> ranking = daoNeo.getRankingEmpleados();

@@ -53,11 +53,19 @@ public class Dao implements DAOInterface {
         }
         return initConex;
     }
+    /**
+     * Metodo para insertar un empleado
+     * @param e 
+     */
     public void insertEmpleado(Empleado e){      
         Session session = driver.session();
         session.run("CREATE (Empleado:empleado {name: '"+e.getUserName()+"', password: '"+ e.getPassword() + "',fullname: '"+ e.getFullName() + "', phone: '"+ e.getPhone() + "'})");
     }
-    
+    /**
+     * Inserta una incidencia is es ugente insertara un evento incidencia
+     * @param i
+     * @throws ParseException 
+     */
     @Override
     public void insertIncidencia(Incidencia i )throws ParseException{
         SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
@@ -73,7 +81,13 @@ public class Dao implements DAOInterface {
         }
     }
     
-    
+    /**
+     * Verifica que esta bien el usuario y contraseña y crea el evento I
+     * @param n
+     * @param pass
+     * @return
+     * @throws NeoExceptions 
+     */
     @Override
     public Empleado loginEmpleado(String n, String pass) throws NeoExceptions{
         Session session = driver.session();
@@ -91,7 +105,10 @@ public class Dao implements DAOInterface {
         insertarEvento(evento);
         return e;
     }
-    
+    /**
+     * Devuelve todos los empleados
+     * @return 
+     */
     public List<Empleado> returnEmpleados(){
         List<Empleado>  empleados = new ArrayList<>();
         Session session = driver.session();
@@ -104,7 +121,11 @@ public class Dao implements DAOInterface {
         return empleados;
         
     }
-    
+    /**
+     * Comprueba si existe un empleado
+     * @param nombre
+     * @return 
+     */
     public boolean existeEmpleado(String nombre){
         Session session = driver.session();
         Result result = session.run("MATCH (n:empleado) where n.name = '"+nombre+"' RETURN n");
@@ -113,7 +134,11 @@ public class Dao implements DAOInterface {
         }
         return false;
     }
-    
+    /**
+     * Comprueba si existe incidencia por ese id
+     * @param id
+     * @return 
+     */
     public boolean existeIncidencia(int id){
         Session session = driver.session();
         Result result = session.run("MATCH (n:incidencia) where n.id = '"+id+"' RETURN n");
@@ -122,7 +147,10 @@ public class Dao implements DAOInterface {
         }
         return false;
     }
-    
+    /**
+     * Permite acutalizar un empleado
+     * @param e 
+     */
     @Override
     public void updateEmpleado(Empleado e){
         Session session = driver.session();
@@ -148,7 +176,12 @@ public class Dao implements DAOInterface {
         }
         return incidencias;
     }
-    
+    /**
+     * Devuelve las incidencias por el destinatario y crea el evento C
+     * @param e
+     * @return
+     * @throws ParseException 
+     */
     @Override
     public List<Incidencia> getIncidenciaByDestino(Empleado e) throws ParseException{
         List<Incidencia>  incidencias = new ArrayList<>();
@@ -187,12 +220,21 @@ public class Dao implements DAOInterface {
     //Modificar : MERGE (p:empleado {name: 'arnau'}) SET p.fullname = 'arnau solans', p.phone = '111111111'
     //MATCH (a:incidencia) WHERE a.origen = 'arnau' or a.destino = 'arnau' return a
 
+    /**
+     * Elimina un empleado con sus relaciones
+     * @param e 
+     */
     @Override
     public void removeEmpleado(Empleado e) {
         Session session = driver.session();
         Result result = session.run("MATCH (n { name: '"+e.getUserName()+"' }) DETACH DELETE n");
     }
-
+    
+    /**
+     * Devuelve una incidencia por el id
+     * @param id
+     * @return 
+     */
     @Override
     public Incidencia getIncidenciaById(int id) {
         Incidencia  i = new Incidencia();
@@ -220,7 +262,10 @@ public class Dao implements DAOInterface {
         }
         return i;
     }
-
+    /**
+     * Devuelve todas las incidencias
+     * @return 
+     */
     @Override
     public List<Incidencia> selectAllIncidencias() {
         List<Incidencia>  incidencias = new ArrayList<>();
@@ -250,7 +295,10 @@ public class Dao implements DAOInterface {
         }
         return incidencias;
     }
-    
+    /**
+     * Permite insertar un evento
+     * @param e 
+     */
     @Override
     public void insertarEvento(Evento e) {
         SimpleDateFormat format1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
@@ -259,7 +307,12 @@ public class Dao implements DAOInterface {
         session.run("CREATE (Historial:historial {tipo: '"+e.getTipoEvento().toString()+"', date: '"+ date + "',empleado: '"+ e.getEmpleado().getUserName() + "'})");
         session.run("MATCH (a:historial),(b:empleado) WHERE a.date = '"+date+"' and b.name='"+e.getEmpleado().getUserName()+"' CREATE (a)-[: event]->(b)");
     }
-
+    
+    /**
+     * Devuelve el ultimo inicio de sesion 
+     * @param e
+     * @return 
+     */
     @Override
     public Evento getUltimoInicioSesion(Empleado e) {
         List<Evento>  eventos = new ArrayList<>();
@@ -292,7 +345,11 @@ public class Dao implements DAOInterface {
         
         return ev;
     }
-
+    
+    /**
+     * Devuelve el ranking de empleados
+     * @return 
+     */
     @Override
     public List<RankingTO> getRankingEmpleados() {
         List<RankingTO> ranking = new ArrayList<>();
@@ -314,7 +371,11 @@ public class Dao implements DAOInterface {
         System.out.println("salir");
         return ranking;
     }
-    
+    /**
+     * Devuelve todas las incidencias creadas por 1 usuario
+     * @param e
+     * @return 
+     */
     public List<Incidencia> selectAllIncidenciasForUser(Empleado e) {
         List<Incidencia>  incidencias = new ArrayList<>();
         Session session = driver.session();
