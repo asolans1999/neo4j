@@ -17,7 +17,7 @@ public class NeoExceptions extends Exception {
     public static final String INCORRECT_TLF= "< ERROR: Incorrect phone format >";
     public static final String INCORRECT_LOGUIN= "< ERROR: Incorrect loguin > ";
     public static final String INCORRECT_PASS= "< ERROR: Incorrect password > ";
-    public static final String NO_EXISTS_EMPLEADOS= "< ERROR: Employes doesn't exists > ";
+    public static final String NO_EXISTS_EMPLEADOS= "< ERROR: Employes don't exists > ";
     public static final String INCIDENCE_BY_ORIGIN= "< ERROR: Doesn't exist incidence of your origin > ";
     public static final String INCIDENCE_BY_DESTINATION= "< ERROR: Doesn't exist incidence of your destination > ";
     public static final String INCIDENCE_BY_ID= "< ERROR: Doesn't exist incidence > ";

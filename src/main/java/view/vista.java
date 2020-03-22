@@ -15,12 +15,15 @@ import enums.TipoIncidencia;
 import exceptions.NeoExceptions;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Empleado;
+import model.Evento;
 import model.Incidencia;
+import model.RankingTO;
 
 
 public class vista {
@@ -41,9 +44,11 @@ public class vista {
                     System.out.println("4. See your destination incidences");
                     System.out.println("5. See an incidence by ID");
                     System.out.println("6. See ALL incidence");
-                    System.out.println("7. Delete your account");
+                    System.out.println("7. Last login");
+                    System.out.println("8. Delete your account");
+                    System.out.println("9. Get Ranking");
                     System.out.println("0. Log off");
-                    menu = InputAsker.askInt("Choose option", 0, 7);
+                    menu = InputAsker.askInt("Choose option", 0, 9);
                     switch(menu){
                         case 1:
                             incidencia();
@@ -64,7 +69,13 @@ public class vista {
                             seeAllIncidence();
                             break;
                         case 7:
+                            lastLogin();
+                            break;
+                        case 8:
                             deleteAcount();
+                            break;
+                        case 9:
+                            getRanking();
                             break;
                         case 0:
                             System.out.println("Good bye !");
@@ -179,6 +190,7 @@ public class vista {
                 daoNeo.updateEmpleado(logueado);
                 System.out.println("Modify correctly");
                 break;
+
             case 2:
                 String phone = InputAsker.askString("New phone: ");       
                 if (phone.length()!=9) {
@@ -188,6 +200,7 @@ public class vista {
                 daoNeo.updateEmpleado(logueado);
                 System.out.println("Modify correctly");
                 break;
+
             case 3:
                 String pass = InputAsker.askString("New password: ");
                 String pass2 = InputAsker.askString("Confirm new password: ");
@@ -198,6 +211,8 @@ public class vista {
                 daoNeo.updateEmpleado(logueado);
                 System.out.println("Modify correctly");
                 break;
+
+
         }      
     }
     
@@ -272,6 +287,23 @@ public class vista {
         
     }
     
+    private static void getRanking(){
+        System.out.println("hola");
+        List<RankingTO> ranking = daoNeo.getRankingEmpleados();
+        ranking.sort((i1,i2)->(i1.getIncidencias()> i2.getIncidencias()) ? -1 : ((i1.getIncidencias()== i2.getIncidencias()) ? 0 : 1));
+        int count = 0;
+        for (RankingTO rt : ranking) {
+            count++;
+            System.out.println(count + ". " + rt.getEmpleado()+ " - " + rt.getIncidencias()); 
+        }
+    }
+    
+    private static void lastLogin(){
+        Evento e = daoNeo.getUltimoInicioSesion(logueado);
+        if (e != null) {
+            System.out.println(e.getDateTime());
+        } 
+    }
     private static void initMenu(){
         System.out.println("<< NEO4J >>");
         System.out.println("1. Log in");

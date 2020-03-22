@@ -5,6 +5,7 @@
  */
 package daoNeo;
 
+import model.RankingTO;
 import exceptions.NeoExceptions;
 import java.text.ParseException;
 import java.util.List;

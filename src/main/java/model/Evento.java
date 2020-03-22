@@ -23,6 +23,10 @@ public class Evento {
         this.empleado = empleado;
     }
 
+    public Evento() {
+        
+    }
+
     public TipoEvento getTipoEvento() {
         return tipoEvento;
     }
