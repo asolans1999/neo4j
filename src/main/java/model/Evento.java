@@ -12,12 +12,12 @@ import java.util.Date;
  *
  * @author arnauu
  */
-public class Historial {
+public class Evento {
     private TipoEvento tipoEvento;
     private Date dateTime;
     private Empleado empleado;
 
-    public Historial(TipoEvento tipoEvento, Date dateTime, Empleado empleado) {
+    public Evento(TipoEvento tipoEvento, Date dateTime, Empleado empleado) {
         this.tipoEvento = tipoEvento;
         this.dateTime = dateTime;
         this.empleado = empleado;

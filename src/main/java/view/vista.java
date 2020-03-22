@@ -39,8 +39,11 @@ public class vista {
                     System.out.println("2. Modify your account");
                     System.out.println("3. See your oirigin incidences");
                     System.out.println("4. See your destination incidences");
+                    System.out.println("5. See an incidence by ID");
+                    System.out.println("6. See ALL incidence");
+                    System.out.println("7. Delete your account");
                     System.out.println("0. Log off");
-                    menu = InputAsker.askInt("Choose option", 0, 4);
+                    menu = InputAsker.askInt("Choose option", 0, 7);
                     switch(menu){
                         case 1:
                             incidencia();
@@ -53,6 +56,15 @@ public class vista {
                             break;
                         case 4:
                             destinationIncidence();
+                            break;
+                        case 5:
+                            incidenceById();
+                            break;
+                        case 6:
+                            seeAllIncidence();
+                            break;
+                        case 7:
+                            deleteAcount();
                             break;
                         case 0:
                             System.out.println("Good bye !");
@@ -141,14 +153,14 @@ public class vista {
         }
         Date d = new Date();
         Incidencia inci = new Incidencia(id, d, origen, destino, descr, tipo);
-        daoNeo.insertIncidencia(inci,logueado);
+        daoNeo.insertIncidencia(inci);
         System.out.println("Incidence registred correctly");
     }
     
     private static void login() throws NeoExceptions{
         String userName = InputAsker.askString("Username: ");
         String pass = InputAsker.askString("Password: ");
-        logueado = daoNeo.loguinEmpleado(userName, pass);
+        logueado = daoNeo.loginEmpleado(userName, pass);
     }
     
     private static void modify() throws NeoExceptions{
@@ -164,7 +176,7 @@ public class vista {
             case 1:
                 String fullanme = InputAsker.askString("New fullname: ");
                 logueado.setFullName(fullanme);
-                daoNeo.modifyEmpleado(logueado);
+                daoNeo.updateEmpleado(logueado);
                 System.out.println("Modify correctly");
                 break;
             case 2:
@@ -173,7 +185,7 @@ public class vista {
                     throw new NeoExceptions(NeoExceptions.INCORRECT_TLF);
                 }
                 logueado.setPhone(phone);
-                daoNeo.modifyEmpleado(logueado);
+                daoNeo.updateEmpleado(logueado);
                 System.out.println("Modify correctly");
                 break;
             case 3:
@@ -183,7 +195,7 @@ public class vista {
                     throw new NeoExceptions(NeoExceptions.NO_COINCIDEN);
                 }
                 logueado.setPassword(pass);
-                daoNeo.modifyEmpleado(logueado);
+                daoNeo.updateEmpleado(logueado);
                 System.out.println("Modify correctly");
                 break;
         }      
@@ -202,7 +214,7 @@ public class vista {
     }
     
     private static void destinationIncidence() throws NeoExceptions, ParseException{
-        List<Incidencia> incidenciaByDestino = daoNeo.getIncidenciaBydestination(logueado);
+        List<Incidencia> incidenciaByDestino = daoNeo.getIncidenciaByDestino(logueado);
         if (incidenciaByDestino.isEmpty()) {
             throw new NeoExceptions(NeoExceptions.INCIDENCE_BY_DESTINATION);
         }
@@ -211,6 +223,53 @@ public class vista {
             String d = format1.format(i.getDatetime());
             System.out.println("Id: "+i.getId() +" | Tipe: " + i.getTipoIncidencia()+" | Description: " + i.getDescripcion() + " | Origin: "+ i.getOrigen().getUserName() +" | Date: "+ d);
         }    
+    }
+    
+    private static void deleteAcount() throws NeoExceptions{
+        System.out.println("1. Yes");
+        System.out.println("2. No");
+        int conf = InputAsker.askInt("Do you sure?",1,2);
+        if (conf == 1) {
+            String pc = InputAsker.askString("Confirm with your passowrd please.");
+            if (!pc.equals(logueado.getPassword())) {
+               throw new NeoExceptions(NeoExceptions.INCORRECT_PASS);
+            }
+            daoNeo.removeEmpleado(logueado);
+            logueado = null;
+            System.out.println("Account deleted correctly");
+        }else{
+            System.out.println("Canceling...");
+        }
+    }
+    
+    private static void incidenceById() throws NeoExceptions{
+        List<Incidencia> incidencias = daoNeo.selectAllIncidenciasForUser(logueado);
+        if (incidencias.isEmpty()) {
+            throw new NeoExceptions(NeoExceptions.INCIDENCE_BY_ID);
+        }
+        int count= 0;
+        for(Incidencia i : incidencias){
+            count++;
+            System.out.println(count + " - Id: "+i.getId());
+        }
+        int sel = InputAsker.askInt("Select an id",1,count);
+        Incidencia i = incidencias.get(sel-1);
+        SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+        String d = format1.format(i.getDatetime());
+        System.out.println("Id: "+i.getId() +" | Tipe: " + i.getTipoIncidencia()+" | Description: " + i.getDescripcion() + " | Origin: "+ i.getOrigen().getUserName() +" | Destination: "+i.getDestino().getUserName()+ " | Date: "+ d);
+    }
+    
+    private static void seeAllIncidence() throws NeoExceptions{
+        List<Incidencia> incidencias = daoNeo.selectAllIncidencias();
+        if (incidencias.isEmpty()) {
+            throw new NeoExceptions(NeoExceptions.INCIDENCE_BY_ID);
+        }
+        for(Incidencia i : incidencias){
+            SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+            String d = format1.format(i.getDatetime());
+            System.out.println("Id: "+i.getId() +" | Tipe: " + i.getTipoIncidencia()+" | Description: " + i.getDescripcion() + " | Origin: "+ i.getOrigen().getUserName() +" | Destination: "+i.getDestino().getUserName()+ " | Date: "+ d);
+        }
+        
     }
     
     private static void initMenu(){
