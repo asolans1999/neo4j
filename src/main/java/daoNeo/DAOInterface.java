@@ -48,7 +48,6 @@ public interface DAOInterface {
     // empleado, a partir de un objeto empleado.
     public List<Incidencia> getIncidenciaByOrigen(Empleado e) throws ParseException;
 
-    
     // Método para insertar un evento en la tabla historial.
     // Pasaremos como parámetro un objeto tipo evento, y no devolverá nada.
     // Llamaremos a este método desde los métodos
@@ -57,7 +56,7 @@ public interface DAOInterface {
     // 2) Cuando un usuario crea una incidencia de tipo urgente 
     // 3) Cuando se consultan las incidencias destinadas a un usuario 
     public void insertarEvento(Evento e);
-    
+
     // Obtener la fecha-hora del último inicio de sesión para un empleado.
     public Evento getUltimoInicioSesion(Empleado e);
 
